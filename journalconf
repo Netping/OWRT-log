@@ -1,0 +1,6 @@
+config info 'LoggerSettings'
+	option native_logger '1'
+	option syslog_logger '0'
+	option syslog_server 'servernameorip'
+	option syslog_server_port '601'
+	option syslog_file 'logger.log'
