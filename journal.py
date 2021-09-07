@@ -11,6 +11,7 @@ class journal:
     params = None
     pollThread = None
     mutex = Lock()
+    configmutex = Lock()
 
     def WriteLog(modulename, type, facility, message):
         #self.__loadparams()
@@ -49,6 +50,8 @@ class journal:
         return value
 
     def __loadparams():
+        journal.configmutex.acquire()
+
         newHash = journal.__md5("/etc/config/system")
         oldHash = journal.__readhash()
 
@@ -57,16 +60,77 @@ class journal:
                 ubus.connect()
 
                 confvalues = ubus.call("uci", "get", {"config": "system"})
-                print(confvalues)
-                
-                #TODO
+                for confdict in list(confvalues[0]['values'].values()):
+                    if confdict['.type'] == 'system':
+                        print(confdict)
+
+                    value = {}
+
+                    try:
+                        if confdict['log_ip']:
+                            value['log_ip'] = confdict
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_port']:
+                            value['log_port'] = confdict['log_port']
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_proto']:
+                            value['log_proto'] = confdict['log_proto']
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_file']:
+                            value['log_file'] = confdict['log_file']
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_remote']:
+                            value['log_remote'] = confdict['log_remote']
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_size']:
+                            value['log_size'] = confdict['log_size']
+                    except:
+                        pass
+
+                    try:
+                        if confdict['log_type']:
+                            value['log_type'] = confdict['log_type']
+                    except:
+                        pass
+
+                    journal.params = value
 
                 ubus.disconnect()
+
+                #os.system("/etc/init.d/log restart")
                 
                 with open("/etc/netping_log/hash", "w") as f:
                     f.write(newHash)
             except:
                 print("Can't load params")
+
+        journal.configmutex.release()
+
+    def __applyparams(p):
+        try:
+            ubus.connect()
+
+            ubus.call("uci", "set", {"config" : "system", "type" : "system", "values" : p})
+            ubus.call("uci", "commit", {"config" : "system"})
+
+            ubus.disconnect()
+        except:
+            print("Can't connect to ubus")
 
     def __poll():
         while journal.task_list:
@@ -76,7 +140,19 @@ class journal:
             msg = l['message']
             journal.mutex.release()
 
+            journal.configmutex.acquire()
+
+            if par != journal.params:
+                journal.__applyparams(par)
+                os.system("/etc/init.d/log restart")
+
             #log message
             os.system('logger -p "' + msg['facility'] +'" -t "' + msg['tag'] + '" "' + msg['text'] + '"')
+
+            if par != journal.params:
+                journal.__applyparams(journal.params)
+                os.system("/etc/init.d/log restart")
+
+            journal.configmutex.release()
 
         journal.pollThread = None
