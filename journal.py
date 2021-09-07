@@ -6,16 +6,15 @@ import hashlib
 
 
 
-
 class journal:
     task_list = []
     params = None
-    paramsHash = ''
     pollThread = None
     mutex = Lock()
 
-    def WriteLog(self, modulename, type, facility, message):
-        self.__loadparams()
+    def WriteLog(modulename, type, facility, message):
+        #self.__loadparams()
+        journal.__loadparams()
         
         logmsg = message #TODO build log message from args
         l = { 'params' : journal.params,
@@ -27,14 +26,14 @@ class journal:
             }
 
         journal.mutex.acquire()
-        journal.task_list.append(l)
+        journal.task_list.insert(0, l)
         journal.mutex.release()
 
         if not journal.pollThread:
-            journal.pollThread = Thread(target=self.__poll, args=())
+            journal.pollThread = Thread(target=journal.__poll, args=())
             journal.pollThread.start()
 
-    def __md5(self, fname):
+    def __md5(fname):
         hash_md5 = hashlib.md5()
         with open(fname, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
@@ -42,12 +41,18 @@ class journal:
 
         return hash_md5.hexdigest()
 
-    def __loadparams(self):
-        newHash = self.__md5("/etc/config/system")
-        print(newHash)
-        print(journal.paramsHash)
+    def __readhash():
+        value = ''
+        with open("/etc/netping_log/hash", "r") as f:
+            value = f.readline()
 
-        if newHash != journal.paramsHash:
+        return value
+
+    def __loadparams():
+        newHash = journal.__md5("/etc/config/system")
+        oldHash = journal.__readhash()
+
+        if newHash != oldHash:
             try:
                 ubus.connect()
 
@@ -57,11 +62,13 @@ class journal:
                 #TODO
 
                 ubus.disconnect()
-                journal.paramsHash = newHash
+                
+                with open("/etc/netping_log/hash", "w") as f:
+                    f.write(newHash)
             except:
                 print("Can't load params")
 
-    def __poll(self):
+    def __poll():
         while journal.task_list:
             journal.mutex.acquire()
             l = journal.task_list.pop()
