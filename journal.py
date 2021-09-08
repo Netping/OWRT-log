@@ -13,7 +13,7 @@ class journal:
     mutex = Lock()
     configmutex = Lock()
 
-    def WriteLog(modulename, type, facility, message):
+    def WriteLog(modulename, typelog, facility, message):
         #self.__loadparams()
         journal.__loadparams()
         
@@ -21,7 +21,7 @@ class journal:
         l = { 'params' : journal.params,
                 'message' : {
                     'text' : logmsg,
-                    'tag' : modulename,
+                    'tag' : modulename + '(' + typelog + ')',
                     'facility' : facility 
                 }
             }
@@ -62,53 +62,51 @@ class journal:
                 confvalues = ubus.call("uci", "get", {"config": "system"})
                 for confdict in list(confvalues[0]['values'].values()):
                     if confdict['.type'] == 'system':
-                        print(confdict)
+                        value = {}
 
-                    value = {}
+                        try:
+                            if confdict['log_ip']:
+                                value['log_ip'] = confdict
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_ip']:
-                            value['log_ip'] = confdict
-                    except:
-                        pass
+                        try:
+                            if confdict['log_port']:
+                                value['log_port'] = confdict['log_port']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_port']:
-                            value['log_port'] = confdict['log_port']
-                    except:
-                        pass
+                        try:
+                            if confdict['log_proto']:
+                                value['log_proto'] = confdict['log_proto']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_proto']:
-                            value['log_proto'] = confdict['log_proto']
-                    except:
-                        pass
+                        try:
+                            if confdict['log_file']:
+                                value['log_file'] = confdict['log_file']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_file']:
-                            value['log_file'] = confdict['log_file']
-                    except:
-                        pass
+                        try:
+                            if confdict['log_remote']:
+                                value['log_remote'] = confdict['log_remote']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_remote']:
-                            value['log_remote'] = confdict['log_remote']
-                    except:
-                        pass
+                        try:
+                            if confdict['log_size']:
+                                value['log_size'] = confdict['log_size']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_size']:
-                            value['log_size'] = confdict['log_size']
-                    except:
-                        pass
+                        try:
+                            if confdict['log_type']:
+                                value['log_type'] = confdict['log_type']
+                        except:
+                            pass
 
-                    try:
-                        if confdict['log_type']:
-                            value['log_type'] = confdict['log_type']
-                    except:
-                        pass
-
-                    journal.params = value
+                        journal.params = value
 
                 ubus.disconnect()
 
@@ -135,6 +133,7 @@ class journal:
     def __poll():
         while journal.task_list:
             journal.mutex.acquire()
+
             l = journal.task_list.pop()
             par = l['params']
             msg = l['message']
