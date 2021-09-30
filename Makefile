@@ -9,13 +9,14 @@ PKG_RELEASE=5
 MODULE_FILES=journal.py
 MODULE_FILES_DIR=/usr/lib/python3.7/
 
-ETC_FILES=system_hash journal_hash Configname
+ETC_FILES=system_hash journal_hash Configname Help
 ETC_FILES_DIR=/etc/netping_log/
 
 CONF_FILE=journalconf
 CONF_DIR=/etc/config/
 
-COMMANDS_DIR=commands
+ETC_FILES_COMMANDS=cmd_logshow.py
+ETC_FILES_COMMANDS_DIR=commands
 
 
 .PHONY: all install
@@ -27,7 +28,8 @@ install:
 	for f in $(MODULE_FILES); do cp $${f} $(MODULE_FILES_DIR); done
 	mkdir $(ETC_FILES_DIR)
 	for f in $(ETC_FILES); do cp etc/$${f} $(ETC_FILES_DIR); done
-	mkdir $(ETC_FILES_DIR)$(COMMANDS_DIR)
+	mkdir $(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR)
+	for f in $(ETC_FILES_COMMANDS); do cp etc/$${f} $(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR); done
 
 clean:
 	rm -f $(CONF_DIR)$(CONF_FILE)
