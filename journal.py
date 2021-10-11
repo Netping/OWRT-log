@@ -17,7 +17,7 @@ class journal:
         #self.__loadparams()
         journal.__loadparams()
         
-        logmsg = message #TODO build log message from args
+        logmsg = message
         l = { 'params' : journal.params,
                 'message' : {
                     'text' : logmsg,
@@ -50,7 +50,77 @@ class journal:
         return value
 
     def __loadparams():
-        journal.configmutex.acquire()\
+        journal.configmutex.acquire()
+
+        newHash = journal.__md5("/etc/config/journalconf")
+        oldHash = journal.__readhash("journal_hash")
+
+        if newHash != oldHash:
+            try:
+                ubus.connect()
+
+                value = {}
+                confvalues = ubus.call("uci", "get", {"config": "journalconf"})
+                for confdict in list(confvalues[0]['values'].values()):
+                    if confdict['.type'] == 'info':
+                        try:
+                            if confdict['log_ip']:
+                                value['log_ip'] = confdict['log_ip']
+                        except:
+                            value['log_ip'] = ''
+
+                        try:
+                            if confdict['log_port']:
+                                value['log_port'] = confdict['log_port']
+                        except:
+                            value['log_port'] = ''
+
+                        try:
+                            if confdict['log_proto']:
+                                value['log_proto'] = confdict['log_proto']
+                        except:
+                            value['log_proto'] = ''
+                            
+                        try:
+                            if confdict['log_file']:
+                                value['log_file'] = confdict['log_file']    
+                        except:
+                            value['log_file'] = ''
+
+                        try:
+                            if confdict['log_remote']:
+                                value['log_remote'] = confdict['log_remote']
+                        except:
+                            value['log_remote'] = ''
+
+                        try:
+                            if confdict['log_size']:
+                                value['log_size'] = confdict['log_size']
+                        except:
+                            value['log_size'] = ''
+
+                        try:
+                            if confdict['log_type']:
+                                value['log_type'] = confdict['log_type']
+                        except:
+                            value['log_type'] = ''
+
+                        journal.params = value
+
+                ubus.disconnect()
+                
+                with open("/etc/netping_log/journal_hash", "w") as f:
+                    f.write(newHash)
+
+                #set to system conf vi os.system (ubus call doesn't work)
+                for k, v in value.items():
+                    os.system("uci set system.@system[0]." + k + "=" + v)
+
+                os.system("uci commit system")
+                os.system("/etc/init.d/log restart")
+
+            except:
+                print("Can't load params")
 
         newHash = journal.__md5("/etc/config/system")
         oldHash = journal.__readhash("system_hash")
@@ -68,45 +138,45 @@ class journal:
                             if confdict['log_ip']:
                                 value['log_ip'] = confdict['log_ip']
                         except:
-                            pass
+                            value['log_ip'] = ''
 
                         try:
                             if confdict['log_port']:
                                 value['log_port'] = confdict['log_port']
                         except:
-                            pass
+                            value['log_port'] = ''
 
                         try:
                             if confdict['log_proto']:
                                 value['log_proto'] = confdict['log_proto']
                         except:
-                            pass
-
+                            value['log_proto'] = ''
+                            
                         try:
                             if confdict['log_file']:
-                                value['log_file'] = confdict['log_file']
+                                value['log_file'] = confdict['log_file']    
                         except:
-                            pass
+                            value['log_file'] = ''
 
                         try:
                             if confdict['log_remote']:
                                 value['log_remote'] = confdict['log_remote']
                         except:
-                            pass
+                            value['log_remote'] = ''
 
                         try:
                             if confdict['log_size']:
                                 value['log_size'] = confdict['log_size']
                         except:
-                            pass
+                            value['log_size'] = ''
 
                         try:
                             if confdict['log_type']:
                                 value['log_type'] = confdict['log_type']
                         except:
-                            pass
+                            value['log_type'] = ''
 
-                        journal.params = value
+                        #journal.params = value
 
                 ubus.disconnect()
 
@@ -114,73 +184,6 @@ class journal:
                 
                 with open("/etc/netping_log/system_hash", "w") as f:
                     f.write(newHash)
-            except:
-                print("Can't load params")
-
-        newHash = journal.__md5("/etc/config/journalconf")
-        oldHash = journal.__readhash("journal_hash")
-
-        if newHash != oldHash:
-            try:
-                ubus.connect()
-
-                value = {}
-                confvalues = ubus.call("uci", "get", {"config": "journalconf"})
-                for confdict in list(confvalues[0]['values'].values()):
-                    if confdict['.type'] == 'info':
-                        try:
-                            if confdict['log_ip']:
-                                value['log_ip'] = confdict['log_ip']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_port']:
-                                value['log_port'] = confdict['log_port']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_proto']:
-                                value['log_proto'] = confdict['log_proto']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_file']:
-                                value['log_file'] = confdict['log_file']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_remote']:
-                                value['log_remote'] = confdict['log_remote']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_size']:
-                                value['log_size'] = confdict['log_size']
-                        except:
-                            pass
-
-                        try:
-                            if confdict['log_type']:
-                                value['log_type'] = confdict['log_type']
-                        except:
-                            pass
-
-                        #journal.params = value
-
-                ubus.disconnect()
-                
-                with open("/etc/netping_log/journal_hash", "w") as f:
-                    f.write(newHash)
-
-                #set to system conf vi os.system (ubus call doesn't work)
-                for k, v in value.items():
-                    os.system("uci set system.@system[0]." + k + "=" + v)
-
             except:
                 print("Can't load params")
 
@@ -194,6 +197,9 @@ class journal:
             ubus.call("uci", "commit", {"config" : "system"})
 
             ubus.disconnect()
+
+            os.system("/etc/init.d/log restart")
+
         except:
             print("Can't connect to ubus")
 
@@ -210,14 +216,12 @@ class journal:
 
             if par != journal.params:
                 journal.__applyparams(par)
-                os.system("/etc/init.d/log restart")
 
             #log message
             os.system('logger -p "' + msg['facility'] +'" -t "' + msg['tag'] + '" "' + msg['text'] + '"')
 
             if par != journal.params:
                 journal.__applyparams(journal.params)
-                os.system("/etc/init.d/log restart")
 
             journal.configmutex.release()
 

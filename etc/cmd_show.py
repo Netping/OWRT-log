@@ -14,6 +14,6 @@ def main(lines):
     if lines > 0:
     	ret = os.system("logread -l " + str(lines))
     else:
-    	ret = os.system("logread -l ")
+    	ret = os.system("logread")
 
     sys.exit(ret)

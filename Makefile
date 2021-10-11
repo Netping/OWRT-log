@@ -4,7 +4,7 @@ TITLE="EPIC4 OWRT_Log"
 
 PKG_NAME="OWRT_Log"
 PKG_VERSION="Epic4.V1.S1"
-PKG_RELEASE=5
+PKG_RELEASE=6
 
 MODULE_FILES=journal.py
 MODULE_FILES_DIR=/usr/lib/python3.7/
@@ -15,7 +15,7 @@ ETC_FILES_DIR=/etc/netping_log/
 CONF_FILE=journalconf
 CONF_DIR=/etc/config/
 
-ETC_FILES_COMMANDS=cmd_logshow.py
+ETC_FILES_COMMANDS=cmd_show.py
 ETC_FILES_COMMANDS_DIR=commands
 
 
