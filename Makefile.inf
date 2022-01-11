@@ -5,6 +5,7 @@ TITLE="EPIC4 OWRT_Log"
 PKG_NAME="OWRT_Log"
 PKG_VERSION=1.1
 PKG_RELEASE=2
+PKG_DEPENDS=
 
 MODULE_FILES=journal.py
 MODULE_FILES_DIR=/usr/lib/python3.7/
@@ -18,20 +19,39 @@ CONF_DIR=/etc/config/
 ETC_FILES_COMMANDS=cmd_show.py
 ETC_FILES_COMMANDS_DIR=commands
 
+INSTALL_DIR=
 
 .PHONY: all install
 
-all: install
+all: configure build install
+
+build:
+	@echo "Nothing to do"
+
+configure:
+	@echo "Nothing to do"
 
 install:
-	cp $(CONF_FILE) $(CONF_DIR)
+ifneq ($(INSTALL_DIR),)
+	-mkdir -p $(INSTALL_DIR)$(CONF_DIR) 
+endif
+	cp $(CONF_FILE) $(INSTALL_DIR)/$(CONF_DIR)
+ifneq ($(INSTALL_DIR),)
+	mkdir -p $(INSTALL_DIR)$(MODULE_FILES_DIR)
+	for f in $(MODULE_FILES); do cp $${f} $(INSTALL_DIR)$(MODULE_FILES_DIR); done
+else
 	for f in $(MODULE_FILES); do cp $${f} $(MODULE_FILES_DIR); done
-	mkdir $(ETC_FILES_DIR)
-	for f in $(ETC_FILES); do cp etc/$${f} $(ETC_FILES_DIR); done
-	mkdir $(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR)
-	for f in $(ETC_FILES_COMMANDS); do cp etc/$${f} $(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR); done
+endif
+	mkdir -p $(INSTALL_DIR)$(ETC_FILES_DIR)
+	for f in $(ETC_FILES); do cp etc/$${f} $(INSTALL_DIR)$(ETC_FILES_DIR); done
+	mkdir -p $(INSTALL_DIR)$(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR)
+	for f in $(ETC_FILES_COMMANDS); do cp etc/$${f} $(INSTALL_DIR)$(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR); done
 
 clean:
+ifeq ($(INSTALL_DIR),)
 	rm -f $(CONF_DIR)$(CONF_FILE)
 	for f in $(MODULE_FILES); do rm -f $(MODULE_FILES_DIR)$${f}; done
 	rm -rf $(ETC_FILES_DIR)
+else
+	rm -rf $(INSTALL_DIR)
+endif
