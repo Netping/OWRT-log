@@ -1,6 +1,6 @@
 SECTION="NetPing modules"
 CATEGORY="Base"
-TITLE="OWRT-Log"
+TITLE="OWRT-log"
 
 PKG_NAME="OWRT-log"
 PKG_VERSION=1.1
