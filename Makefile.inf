@@ -4,7 +4,7 @@ TITLE="OWRT-log"
 
 PKG_NAME="OWRT-log"
 PKG_VERSION=1.1
-PKG_RELEASE=2
+PKG_RELEASE=3
 PKG_DEPENDS=OWRT-PLIB-ubus
 
 MODULE_FILES=journal.py
@@ -18,6 +18,8 @@ CONF_DIR=/etc/config/
 
 ETC_FILES_COMMANDS=cmd_show.py
 ETC_FILES_COMMANDS_DIR=commands
+
+AUTORUN_FILES=owrt_pingers_autorun
 
 INSTALL_DIR=
 
