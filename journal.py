@@ -44,7 +44,7 @@ class journal:
 
     def __readhash(hashfile):
         value = ''
-        with open("/etc/netping_log/" + hashfile, "r") as f:
+        with open("/etc/netping/log/" + hashfile, "r") as f:
             value = f.readline()
 
         return value
@@ -109,7 +109,7 @@ class journal:
 
                 ubus.disconnect()
                 
-                with open("/etc/netping_log/journal_hash", "w") as f:
+                with open("/etc/netping/log/journal_hash", "w") as f:
                     f.write(newHash)
 
                 #set to system conf vi os.system (ubus call doesn't work)
@@ -182,7 +182,7 @@ class journal:
 
                 #os.system("/etc/init.d/log restart")
                 
-                with open("/etc/netping_log/system_hash", "w") as f:
+                with open("/etc/netping/log/system_hash", "w") as f:
                     f.write(newHash)
             except:
                 print("Can't load params")
