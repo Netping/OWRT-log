@@ -4,7 +4,7 @@ TITLE="OWRT-log"
 
 PKG_NAME="OWRT-log"
 PKG_VERSION=1.1
-PKG_RELEASE=3
+PKG_RELEASE=4
 PKG_DEPENDS=OWRT-PLIB-ubus
 
 MODULE_FILES=journal.py
@@ -18,6 +18,8 @@ CONF_DIR=/etc/config/
 
 ETC_FILES_COMMANDS=cmd_show.py
 ETC_FILES_COMMANDS_DIR=commands
+
+TESTS_SRC_DIR=Tests
 
 INSTALL_DIR=
 
@@ -49,6 +51,7 @@ endif
 	for f in $(ETC_FILES); do cp etc/$${f} $(INSTALL_DIR)$(ETC_FILES_DIR); done
 	mkdir -p $(INSTALL_DIR)$(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR)
 	for f in $(ETC_FILES_COMMANDS); do cp etc/$${f} $(INSTALL_DIR)$(ETC_FILES_DIR)$(ETC_FILES_COMMANDS_DIR); done
+	cp -r $(TESTS_SRC_DIR) $(INSTALL_DIR)$(ETC_FILES_DIR)
 
 clean:
 ifeq ($(INSTALL_DIR),)
