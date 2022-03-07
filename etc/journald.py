@@ -39,18 +39,6 @@ def init():
         ubus.call("uci", "set", {"config" : "system", "type" : "system", "values" : params})
         ubus.call("uci", "commit", {"config" : "system"})
 
-        #restart log and system services
-        if os.system(f"/etc/init.d/log restart"):
-            ret['status'] = '1'
-
-        if os.system(f"/etc/init.d/system restart"):
-            ret['status'] = '2'
-
-        if ret['status'] == '0':
-            mutex.acquire()
-            time.sleep(1) #block mutex in 1 second for applying config parameters (else some log records may be not writen)
-            mutex.release()
-
         event.reply(ret)
 
     def add_task_callback(event, data):
@@ -144,6 +132,14 @@ def commit_callback(event, data):
                         params['log_type'] = confdict['log_type']
                 except:
                     pass
+
+        #restart log and system services
+        os.system(f"/etc/init.d/log restart")
+        os.system(f"/etc/init.d/system restart")
+
+        mutex.acquire()
+        time.sleep(1) #block mutex in 1 second for applying config parameters (else some log records may be not writen)
+        mutex.release()
 
 def poll():
     while task_list:
