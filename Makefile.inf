@@ -45,6 +45,8 @@ endif
 	cp $(CONF_FILE) $(INSTALL_DIR)/$(CONF_DIR)
 ifneq ($(INSTALL_DIR),)
 	mkdir -p $(INSTALL_DIR)$(MODULE_FILES_DIR)
+	mkdir -p $(INSTALL_DIR)/etc/init.d
+        mkdir -p $(INSTALL_DIR)/etc/rc.d
 	for f in $(MODULE_FILES); do cp $${f} $(INSTALL_DIR)$(MODULE_FILES_DIR); done
 else
 	for f in $(MODULE_FILES); do cp $${f} $(MODULE_FILES_DIR); done
