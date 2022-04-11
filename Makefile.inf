@@ -58,7 +58,7 @@ endif
 	cp -r $(TESTS_SRC_DIR) $(INSTALL_DIR)$(ETC_FILES_DIR)
 	for f in $(AUTORUN_FILES); do cp $${f} $(INSTALL_DIR)/etc/init.d; done
 	mv $(INSTALL_DIR)/etc/init.d/owrt_log_autorun $(INSTALL_DIR)/etc/init.d/owrt_log
-	ln -s ../init.d/owrt_log $(INSTALL_DIR)/etc/rc.d/S90OWRT-Log
+	ln -fs ../init.d/owrt_log $(INSTALL_DIR)/etc/rc.d/S90OWRT-Log
 
 clean:
 ifeq ($(INSTALL_DIR),)
